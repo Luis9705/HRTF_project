@@ -1,0 +1,28 @@
+### python ###
+__pycache__/
+### eclipse ###
+*.tmp
+*.bak
+*.swp
+*~.nib
+### JupyterNotebook ###
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+
+### C ###
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+### MATLAB ###
+# Windows default autosave extension
+*.asv
+
+
+HRTF/
+audio/*
