@@ -279,3 +279,120 @@ arm-none-eabi-size "UART_FULL_DUPLEX.elf"
    text	   data	    bss	    dec	    hex	filename
   27852	   1176	  31476	  60504	   ec58	UART_FULL_DUPLEX.elf
  
+17:51:32 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c:423:13: warning: 'display_LCD' defined but not used [-Wunused-function]
+ static void display_LCD(__IO uint16_t *data, uint16_t size){
+             ^~~~~~~~~~~
+Finished building: ../src/main.c
+ 
+Building target: UART_FULL_DUPLEX.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UART_FULL_DUPLEX.elf" @"objects.list"  -larm_cortexM4lf_math -lm
+Finished building target: UART_FULL_DUPLEX.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "UART_FULL_DUPLEX.elf" "UART_FULL_DUPLEX.bin"
+arm-none-eabi-size "UART_FULL_DUPLEX.elf"
+   text	   data	    bss	    dec	    hex	filename
+  27804	   1176	  28916	  57896	   e228	UART_FULL_DUPLEX.elf
+ 
+17:51:38 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+make: Nothing to be done for 'all'.
+17:51:45 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+make: Nothing to be done for 'all'.
+17:51:53 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+make: Nothing to be done for 'all'.
+18:00:53 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c:423:13: warning: 'display_LCD' defined but not used [-Wunused-function]
+ static void display_LCD(__IO uint16_t *data, uint16_t size){
+             ^~~~~~~~~~~
+Finished building: ../src/main.c
+ 
+Building target: UART_FULL_DUPLEX.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UART_FULL_DUPLEX.elf" @"objects.list"  -larm_cortexM4lf_math -lm
+Finished building target: UART_FULL_DUPLEX.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "UART_FULL_DUPLEX.elf" "UART_FULL_DUPLEX.bin"
+arm-none-eabi-size "UART_FULL_DUPLEX.elf"
+   text	   data	    bss	    dec	    hex	filename
+  27852	   1176	  31476	  60504	   ec58	UART_FULL_DUPLEX.elf
+ 
+18:21:23 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c:426:13: warning: 'display_LCD' defined but not used [-Wunused-function]
+ static void display_LCD(__IO uint16_t *data, uint16_t size){
+             ^~~~~~~~~~~
+Finished building: ../src/main.c
+ 
+Building target: UART_FULL_DUPLEX.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UART_FULL_DUPLEX.elf" @"objects.list"  -larm_cortexM4lf_math -lm
+Finished building target: UART_FULL_DUPLEX.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "UART_FULL_DUPLEX.elf" "UART_FULL_DUPLEX.bin"
+arm-none-eabi-size "UART_FULL_DUPLEX.elf"
+   text	   data	    bss	    dec	    hex	filename
+  27824	   1176	  31476	  60476	   ec3c	UART_FULL_DUPLEX.elf
+ 
+18:25:14 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c: In function 'main':
+../src/main.c:311:2: error: expected ';' before 'arm_fir_f32'
+  arm_fir_f32 ( &fir_struct_highpass,
+  ^~~~~~~~~~~
+At top level:
+../src/main.c:425:13: warning: 'display_LCD' defined but not used [-Wunused-function]
+ static void display_LCD(__IO uint16_t *data, uint16_t size){
+             ^~~~~~~~~~~
+src/subdir.mk:30: recipe for target 'src/main.o' failed
+make: *** [src/main.o] Error 1
+18:25:36 **** Incremental Build of configuration Debug for project UART_FULL_DUPLEX ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/UART_FULL_DUPLEX/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+../src/main.c:425:13: warning: 'display_LCD' defined but not used [-Wunused-function]
+ static void display_LCD(__IO uint16_t *data, uint16_t size){
+             ^~~~~~~~~~~
+Finished building: ../src/main.c
+ 
+Building target: UART_FULL_DUPLEX.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UART_FULL_DUPLEX.elf" @"objects.list"  -larm_cortexM4lf_math -lm
+Finished building target: UART_FULL_DUPLEX.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "UART_FULL_DUPLEX.elf" "UART_FULL_DUPLEX.bin"
+arm-none-eabi-size "UART_FULL_DUPLEX.elf"
+   text	   data	    bss	    dec	    hex	filename
+  27864	   1176	  31476	  60516	   ec64	UART_FULL_DUPLEX.elf
+ 

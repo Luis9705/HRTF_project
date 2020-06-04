@@ -33,7 +33,7 @@ stream = p.open(format=p.get_format_from_width(2),
                 output=True)
 
 start_time = 50
-duration = 30
+duration = 10
 
 BLOCK_SIZE = 640
 

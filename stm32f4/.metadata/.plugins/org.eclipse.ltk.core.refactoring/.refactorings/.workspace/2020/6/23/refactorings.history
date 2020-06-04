@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;HRTF&apos; to &apos;HRTF_test&apos;" description="Rename resource &apos;HRTF&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/HRTF" name="HRTF_test" stamp="1591313619635" updateReferences="true"/>
+</session>

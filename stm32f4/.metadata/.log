@@ -99,3 +99,18 @@ java.net.UnknownHostException: dev.eclipse.org
 	at com.google.common.util.concurrent.AbstractIdleService$2$1.run(AbstractIdleService.java:54)
 	at com.google.common.util.concurrent.Callables$3.run(Callables.java:93)
 	at java.lang.Thread.run(Thread.java:748)
+
+!ENTRY org.eclipse.launchbar.core 2 0 2020-06-04 17:51:31.301
+!MESSAGE Enablement expression is missing for descriptor type org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.eclipse.launchbar.core 2 0 2020-06-04 17:51:31.304
+!MESSAGE Enablement expression is missing for config provider for org.eclipse.cdt.debug.core.coreBuildDescriptorType
+
+!ENTRY org.eclipse.cdt.core 1 0 2020-06-04 18:30:54.520
+!MESSAGE Indexed 'ADC_test' (46 sources, 50 headers) in 3.96 sec: 8,756 declarations; 29,392 references; 15 unresolved inclusions; 51 syntax errors; 9,267 unresolved names (20%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2020-06-04 18:31:57.713
+!MESSAGE Indexed 'HRTF' (46 sources, 107 headers) in 5.81 sec: 11,989 declarations; 44,042 references; 0 unresolved inclusions; 1 syntax errors; 0 unresolved names (0%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2020-06-04 18:33:44.164
+!MESSAGE Indexed 'HRTF_test' (46 sources, 107 headers) in 3.51 sec: 11,989 declarations; 44,042 references; 0 unresolved inclusions; 1 syntax errors; 0 unresolved names (0%)
