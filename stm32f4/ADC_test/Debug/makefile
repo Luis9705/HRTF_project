@@ -30,13 +30,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: UART_FULL_DUPLEX.elf
+all: ADC_test.elf
 
 # Tool invocations
-UART_FULL_DUPLEX.elf: $(OBJS) $(USER_OBJS) C:\Users\FLL1GA\Documents\Luis\ Javier\ Flores\Tec\ de\ Monterrey\8vo\ Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld
+ADC_test.elf: $(OBJS) $(USER_OBJS) C:\Users\FLL1GA\Documents\Luis\ Javier\ Flores\Tec\ de\ Monterrey\8vo\ Semestre\DSPs\HRTF_project\stm32f4\ADC_test\LinkerScript.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\UART_FULL_DUPLEX\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UART_FULL_DUPLEX.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\ADC_test\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\ADC_test\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "ADC_test.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -48,8 +48,8 @@ clean:
 
 post-build:
 	-@echo 'Generating binary and Printing size information:'
-	arm-none-eabi-objcopy -O binary "UART_FULL_DUPLEX.elf" "UART_FULL_DUPLEX.bin"
-	arm-none-eabi-size "UART_FULL_DUPLEX.elf"
+	arm-none-eabi-objcopy -O binary "ADC_test.elf" "ADC_test.bin"
+	arm-none-eabi-size "ADC_test.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents

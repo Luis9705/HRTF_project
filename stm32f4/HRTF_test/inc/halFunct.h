@@ -18,4 +18,7 @@ void DMA_Tx_Configuration(__IO uint8_t * buffer1,__IO uint8_t * buffer2, uint16_
 void NVIC_DMA_Tx_Configuration(void);
 void DMA_Rx_Configuration(__IO uint8_t * buffer1, __IO uint8_t * buffer2, uint16_t size);
 void NVIC_DMA_Rx_Configuration(void);
+void ADC_Config(void);
+ uint16_t ADC_getValue(void);
+ uint16_t get_angle(void);
 

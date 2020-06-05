@@ -1,0 +1,23 @@
+19:42:30 **** Incremental Build of configuration Debug for project HRTF_test ****
+make -j4 all 
+Building file: ../src/main.c
+Invoking: MCU GCC Compiler
+C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\HRTF_test\Debug
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -DSTM32 -DARM_MATH_CM4 '-D__FPU_USED = 1' '-D__FPU_PRESENT = 1' -DSTM32F4 -DSTM32F429ZITx -DSTM32F429I_DISCO -DDEBUG -DSTM32F429_439xx -DUSE_STDPERIPH_DRIVER -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/Utilities/Common" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/StdPeriph_Driver/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/inc" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/CMSIS/device" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/CMSIS/core" -I"C:/Users/FLL1GA/Documents/Luis Javier Flores/Tec de Monterrey/8vo Semestre/DSPs/HRTF_project/stm32f4/HRTF_test/Utilities/STM32F429I-Discovery" -O0 -g3 -Wall -fmessage-length=0 -ffunction-sections -c -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
+Finished building: ../src/main.c
+ 
+Building target: HRTF_test.elf
+Invoking: MCU GCC Linker
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -L"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\HRTF_test\lib" -T"C:\Users\FLL1GA\Documents\Luis Javier Flores\Tec de Monterrey\8vo Semestre\DSPs\HRTF_project\stm32f4\HRTF_test\LinkerScript.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "HRTF_test.elf" @"objects.list"  -larm_cortexM4lf_math -lm
+Finished building target: HRTF_test.elf
+ 
+make --no-print-directory post-build
+Generating binary and Printing size information:
+arm-none-eabi-objcopy -O binary "HRTF_test.elf" "HRTF_test.bin"
+arm-none-eabi-size "HRTF_test.elf"
+   text	   data	    bss	    dec	    hex	filename
+  46672	   1120	  25700	  73492	  11f14	HRTF_test.elf
+ 
+
+19:42:36 Build Finished (took 5s.934ms)
+

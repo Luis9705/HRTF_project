@@ -28,6 +28,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "halFunct.h"
+#include "coefficients.h"
 #include "arm_math.h"
 
 
@@ -42,13 +43,12 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/ 
-#define FONTSIZE         Font12x12
 
 #define SENDING_BLOCKS 2
 #define BUFFER_SIZE_16BITS	640
 #define BUFFER_SIZE_8BITS	BUFFER_SIZE_16BITS*2
 
-#define NUM_COEFF       30
+#define NUM_COEFF       NCOEFF
 
 __IO uint8_t uartRxBuffer_8bits1[BUFFER_SIZE_8BITS];
 __IO uint8_t uartRxBuffer_8bits2[BUFFER_SIZE_8BITS];
@@ -69,454 +69,114 @@ uint8_t data_out_buffer_8bits_left[BUFFER_SIZE_8BITS];
 float32_t data_in_buffer_float[BUFFER_SIZE_16BITS];
 float32_t data_out_buffer_float[BUFFER_SIZE_16BITS];
 
-arm_fir_instance_f32 fir_struct_bandpass = {0};
-arm_fir_instance_f32 fir_struct_lowpass = {0};
-arm_fir_instance_f32 fir_struct_highpass = {0};
+arm_fir_instance_f32 fir_struct_right_channel = {0};
+arm_fir_instance_f32 fir_struct_left_channel = {0};
 
 
-const float32_t fir_coefficients_bandpass[NUM_COEFF] = {
-	   0.001230077818,-0.0004656519159,-0.001785991597,-0.001315643196,  0.00219952222,
-	   0.006215703674, 0.002844037721, -0.01646158099, -0.05142180994, -0.08645879477,
-	   -0.09540998191, -0.05775989592,  0.02379585057,   0.1185133532,   0.1819779277,
-		 0.1819779277,   0.1185133532,  0.02379585057, -0.05775989592, -0.09540998191,
-	   -0.08645879477, -0.05142180994, -0.01646158099, 0.002844037721, 0.006215703674,
-		0.00219952222,-0.001315643196,-0.001785991597,-0.0004656519159, 0.001230077818
-};
 
-const float32_t fir_coefficients_lowpass[NUM_COEFF] = {
-	   0.001660885755, 0.001669131219,-0.0003099146998,-0.004270857666, -0.00634398777,
-	  -0.0005407619174,  0.01264786068,   0.0203030128,  0.00594812585, -0.02935836092,
-		-0.0549142547, -0.02712169848,  0.07165023685,   0.2060391754,   0.3029414117,
-		 0.3029414117,   0.2060391754,  0.07165023685, -0.02712169848,  -0.0549142547,
-	   -0.02935836092,  0.00594812585,   0.0203030128,  0.01264786068,-0.0005407619174,
-	   -0.00634398777,-0.004270857666,-0.0003099146998, 0.001669131219, 0.001660885755
-};
-
-const float32_t fir_coefficients_highpass[NUM_COEFF] = {
-	  0.0005600868608,-0.001335998997,-0.003108558245,-0.002197619528, 0.003676217049,
-		0.01087517012, 0.009126743302,-0.007997745648, -0.02953224443, -0.02874099091,
-		0.01258006506,  0.07479119301,  0.09494045377, -0.01549747214,  -0.5583462119,
-		 0.5583462119,  0.01549747214, -0.09494045377, -0.07479119301, -0.01258006506,
-		0.02874099091,  0.02953224443, 0.007997745648,-0.009126743302, -0.01087517012,
-	  -0.003676217049, 0.002197619528, 0.003108558245, 0.001335998997,-0.0005600868608
-};
-
-float fir_states_bandpass [BUFFER_SIZE_16BITS + NUM_COEFF - 1];
-float fir_states_lowpass [BUFFER_SIZE_16BITS + NUM_COEFF - 1];
-float fir_states_highpass [BUFFER_SIZE_16BITS + NUM_COEFF - 1];
+float fir_states_right_channel [BUFFER_SIZE_16BITS + NUM_COEFF - 1];
+float fir_states_left_channel [BUFFER_SIZE_16BITS + NUM_COEFF - 1];
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* You can monitor the converted value by adding the variable "uhADC3ConvertedValue" 
    to the debugger watch window */
-__IO uint16_t adcBuffer_16bits[BUFFER_SIZE_16BITS]; //Buffer de muestras
 
 
-Point 	pointBuffer[BUFFER_SIZE_16BITS];	 //Buffer de puntos para gráficar
-pPoint  pPoints=(pPoint)pointBuffer;
-
-__IO uint8_t KeyPressed = SET;
-__IO uint8_t intFlag=0, process=0, send_dma = 0, memory_full = 0, current_memory_in = 1, current_memory_out = 0;
-DAC_InitTypeDef  DAC_InitStructure;
-
-const uint16_t Sine12bit[128] = {2048,2138,2228,2318,2407,2495,2582,2668,2753,2835,2916,2995,
-		3071,3145,3217,3285,3351,3413,3472,3528,3580,3628,3673,3713,3750,3783,3811,3835,3855,
-		3870,3881,3888,3890,3888,3881,3870,3855,3835,3811,3783,3750,3713,3673,3628,3580,3528,3472,
-		3413,3351,3285,3217,3145,3071,2995,2916,2835,2753,2668,2582,2495,2407,2318,2228,2138,2048,1957,
-		1867,1777,1688,1600,1513,1427,1342,1260,1179,1100,1024,950,878,810,744,682,623,567,515,467,422,
-		382,345,312,284,260,240,225,214,207,205,207,214,225,240,260,284,312,345,382,422,467,515,567,623,
-		682,744,810,878,950,1024,1100,1179,1260,1342,1427,1513,1600,1688,1777,1867,1957}; //Sine wave
+__IO uint8_t send_dma = 0, memory_full = 0, current_memory_in = 1, current_memory_out = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
-#ifdef USE_LCD
-static void Display_Init(void);
-static void ADC3_CH13_DMA_Config(void);
-static void display_LCD(__IO uint16_t *data, uint16_t size);
-#endif /* USE_LCD */
 /* Private functions ---------------------------------------------------------*/
 
 
-
-void TIM6_Config(void)
-{
-  /* TIM6CLK = HCLK / 4 = SystemCoreClock /4 */
-
-  TIM_TimeBaseInitTypeDef    TIM_TimeBaseStructure;
-  /* TIM6 Periph clock enable */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM6, ENABLE);
-
-  /* Time base configuration */
-  TIM_TimeBaseStructInit(&TIM_TimeBaseStructure);
-  TIM_TimeBaseStructure.TIM_Period = 0x2F;
-  TIM_TimeBaseStructure.TIM_Prescaler = TIM_ICPSC_DIV1;
-  TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV4;
-  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseInit(TIM6, &TIM_TimeBaseStructure);
-
-  /* TIM6 TRGO selection */
-  TIM_SelectOutputTrigger(TIM6, TIM_TRGOSource_Update);
-
-  /* TIM6 enable counter */
-  TIM_Cmd(TIM6, ENABLE);
-}
-
-
-void DAC_Ch2_SineWaveConfig(void)
-{
-  DMA_InitTypeDef DMA_InitStructure;
-  GPIO_InitTypeDef GPIO_InitStructure;
-
-  /* DMA1 clock and GPIOA clock enable (to be used with DAC) */
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1 | RCC_AHB1Periph_GPIOA, ENABLE);
-
-  /* DAC Periph clock enable */
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_DAC, ENABLE);
-
-  /* DAC channel 1 & 2 (DAC_OUT1 = PA.4)(DAC_OUT2 = PA.5) configuration */
-  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_5;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  /* DAC channel2 Configuration */
-  DAC_InitStructure.DAC_Trigger = DAC_Trigger_T6_TRGO;
-  DAC_InitStructure.DAC_WaveGeneration = DAC_WaveGeneration_None;
-  DAC_InitStructure.DAC_OutputBuffer = DAC_OutputBuffer_Enable;
-  DAC_Init(DAC_Channel_2, &DAC_InitStructure);
-
-  /* DMA1_Stream5 channel7 configuration **************************************/
-  DMA_DeInit(DMA1_Stream5);
-  DMA_InitStructure.DMA_Channel = DMA_Channel_7;
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&DAC->DHR12R2);
-  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&Sine12bit;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
-  DMA_InitStructure.DMA_BufferSize = 128;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
-  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
-  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(DMA1_Stream6, &DMA_InitStructure);
-
-  /* Enable DMA1_Stream5 */
-  DMA_Cmd(DMA1_Stream6, ENABLE);
-
-  /* Enable DAC Channel2 */
-  DAC_Cmd(DAC_Channel_2, ENABLE);
-
-  /* Enable DMA for DAC Channel2 */
-  DAC_DMACmd(DAC_Channel_2, ENABLE);
-}
-
-
-/**
-  * @brief  Main program
-  * @param  None
-  * @retval None
-  */
 
 
 
 int main(void)
 {
-#ifdef USE_LCD 
-  /* LCD Display init  */
-Display_Init();
-#endif /* USE_LCD */
-  TIM6_Config();
 
-  STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI);
-  DAC_Ch2_SineWaveConfig();
+	RCC_Configuration();
+	NVIC_DMA_Tx_Configuration();
+	NVIC_DMA_Rx_Configuration();
+	GPIO_Configuration();
+	UART_Configuration();
+	DMA_Tx_Configuration(uartTxBuffer_8bits1, uartTxBuffer_8bits2, BUFFER_SIZE_8BITS*SENDING_BLOCKS +5);
+	DMA_Rx_Configuration(uartRxBuffer_8bits1, uartRxBuffer_8bits2, BUFFER_SIZE_8BITS);
+	ADC_Config();
 
-  RCC_Configuration();
-  NVIC_DMA_Tx_Configuration();
-  NVIC_DMA_Rx_Configuration();
-  GPIO_Configuration();
-  UART_Configuration();
-  DMA_Tx_Configuration(uartTxBuffer_8bits1, uartTxBuffer_8bits2, BUFFER_SIZE_8BITS*SENDING_BLOCKS +5);
-  DMA_Rx_Configuration(uartRxBuffer_8bits1, uartRxBuffer_8bits2, BUFFER_SIZE_8BITS);
+	arm_fir_init_f32(&fir_struct_right_channel, NUM_COEFF, (float32_t *)&right[0], &fir_states_right_channel[0], BUFFER_SIZE_16BITS);
+	arm_fir_init_f32(&fir_struct_left_channel, NUM_COEFF, (float32_t *)&left[0], &fir_states_left_channel[0], BUFFER_SIZE_16BITS);
 
-  /* ADC3 configuration *******************************************************/
-  /*  - Enable peripheral clocks                                              */
-  /*  - DMA2_Stream0 channel2 configuration                                   */
-  /*  - Configure ADC Channel13 pin as analog input                           */
-  /*  - Configure ADC3 Channel13                                              */
+	uint16_t angle;
+	uint16_t index;
 
-  uint16_t i;
-for(i=0;i<BUFFER_SIZE_16BITS;i++){
-	pPoints++->Y=i;  //eje de tiempo en la Y, dimension mas larga de la pantalla
-}
-pPoints=(pPoint)pointBuffer;
-ADC3_CH13_DMA_Config();
-TIM2_Config();
+	while (1)
+	  {
 
 
-arm_fir_init_f32(&fir_struct_bandpass, NUM_COEFF, (float32_t *)&fir_coefficients_bandpass[0], &fir_states_bandpass[0], BUFFER_SIZE_16BITS);
-arm_fir_init_f32(&fir_struct_lowpass, NUM_COEFF, (float32_t *)&fir_coefficients_lowpass[0], &fir_states_lowpass[0], BUFFER_SIZE_16BITS);
-arm_fir_init_f32(&fir_struct_highpass, NUM_COEFF, (float32_t *)&fir_coefficients_highpass[0], &fir_states_highpass[0], BUFFER_SIZE_16BITS);
+		while(memory_full==0){}
+		memory_full = 0;
 
-while (1)
-  {
-//	// Schmitt trigger
-//	ADC_ContinuousModeCmd(ADC3, ENABLE);
-//	ADC_SoftwareStartConv(ADC3);
-//	schmitt_trigger(2000, 50);
-//	ADC_ContinuousModeCmd(ADC3, DISABLE);
-//	delay(10000);
-//	ADC_DMACmd(ADC3, ENABLE);
-//	TIM_Cmd(TIM2, ENABLE);
-//	intFlag=0;
-//    while(intFlag==0){} //Esperar interrupcion del DMA
-//
-//	display_LCD(adcBuffer_16bits, BUFFERSIZE);
+		angle = get_angle();
+		index = angle * NCOEFF;
 
+		/*************************** FORMATTING INPUT DATA ******************************/
 
-	while(memory_full==0){}
-	memory_full = 0;
+		convert_8bits_to_16bits(uartRxBuffer_8bits[current_memory_in], data_in_buffer_16bits, BUFFER_SIZE_16BITS);
 
-	/*************************** FORMATTING INPUT DATA ******************************/
+		arm_q15_to_float (( q15_t *)data_in_buffer_16bits, data_in_buffer_float, BUFFER_SIZE_16BITS);
 
-	convert_8bits_to_16bits(uartRxBuffer_8bits[current_memory_in], data_in_buffer_16bits, BUFFER_SIZE_16BITS);
+		/*************************** RIGHT CHANNEL PROCESSING ******************************/
 
-	arm_q15_to_float (( q15_t *)data_in_buffer_16bits, data_in_buffer_float, BUFFER_SIZE_16BITS);
+		fir_struct_right_channel.pCoeffs = (float32_t *)&right[index];
 
-	/*************************** RIGHT CHANNEL PROCESSING ******************************/
+		arm_fir_f32	(	&fir_struct_right_channel,
+				data_in_buffer_float,
+				data_out_buffer_float,
+				BUFFER_SIZE_16BITS
+		);
 
-	fir_struct_bandpass.pCoeffs = (float32_t *)&fir_coefficients_bandpass[0];
+		arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
 
-	arm_fir_f32	(	&fir_struct_bandpass,
-			data_in_buffer_float,
-			data_out_buffer_float,
-			BUFFER_SIZE_16BITS
-	);
+		convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_right, BUFFER_SIZE_16BITS);
 
-	arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
+		/*************************** LEFT CHANNEL PROCESSING ******************************/
 
-	convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_right, BUFFER_SIZE_16BITS);
+	//	for(i=0;i<BUFFER_SIZE_16BITS;i++){
+	//		data_out_buffer_16bits[i] = data_in_buffer_16bits[i];
+	//	}
 
-	/*************************** LEFT CHANNEL PROCESSING ******************************/
+		fir_struct_left_channel.pCoeffs = (float32_t *)&left[index];
 
-//	for(i=0;i<BUFFER_SIZE_16BITS;i++){
-//		data_out_buffer_16bits[i] = data_in_buffer_16bits[i];
-//	}
+		arm_fir_f32	(	&fir_struct_left_channel,
+				data_in_buffer_float,
+				data_out_buffer_float,
+				BUFFER_SIZE_16BITS
+		);
 
-	fir_struct_highpass.pCoeffs = (float32_t *)&fir_coefficients_highpass[0];
+		arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
 
-	arm_fir_f32	(	&fir_struct_highpass,
-			data_in_buffer_float,
-			data_out_buffer_float,
-			BUFFER_SIZE_16BITS
-	);
-
-	arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
-
-	convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_left, BUFFER_SIZE_16BITS);
+		convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_left, BUFFER_SIZE_16BITS);
 
 
-	/*************************** SENDING OUTPUT DATA ******************************/
+		/*************************** SENDING OUTPUT DATA ******************************/
 
-	if(SENDING_BLOCKS == 1){
-		format_Tx_Block_Mono(data_out_buffer_8bits_right, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
-	}else{
-		format_Tx_Block_Stereo(data_out_buffer_8bits_right, data_out_buffer_8bits_left, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
-	}
+		if(SENDING_BLOCKS == 1){
+			format_Tx_Block_Mono(data_out_buffer_8bits_right, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
+		}else{
+			format_Tx_Block_Stereo(data_out_buffer_8bits_right, data_out_buffer_8bits_left, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
+		}
 
 
-	while(send_dma==1){}
-	send_dma = 1;
-	sendBlockDMA();
+		while(send_dma==1){}
+		send_dma = 1;
+		sendBlockDMA();
 
-  }
+	  }
 }
 
 
-void DMA1_Stream7_IRQHandler(void)
-{
-	/* Test on DMA Stream Transfer Complete interrupt */
-
-	if (DMA_GetITStatus(DMA1_Stream7, DMA_IT_TCIF7))
-	{
-		DMA_Cmd(DMA1_Stream7, DISABLE);
-		USART_DMACmd(UART5, USART_DMAReq_Tx, DISABLE);
-		send_dma = 0;
-		current_memory_out ^= 1;
-		/* Clear DMA Stream Transfer Complete interrupt pending bit */
-		DMA_ClearITPendingBit(DMA1_Stream7, DMA_IT_TCIF7);
-
-
-	}
-
-
-}
-
-void DMA1_Stream2_IRQHandler(void)
-{
-	/* Test on DMA Stream Transfer Complete interrupt */
-	if (DMA_GetITStatus(DMA1_Stream2, DMA_IT_TCIF2))
-	{
-		/* Clear DMA Stream Transfer Complete interrupt pending bit */
-		DMA_ClearITPendingBit(DMA1_Stream2, DMA_IT_TCIF2);
-		//USART_SendData(UART4, 'C');
-		current_memory_in ^= 1;
-		memory_full = 1;
-	}
-
-
-	/* Test on DMA Stream Half Transfer interrupt */
-//	if (DMA_GetITStatus(DMA1_Stream2, DMA_IT_HTIF2))
-//	{
-//		/* Clear DMA Stream Half Transfer interrupt pending bit */
-//		DMA_ClearITPendingBit(DMA1_Stream2, DMA_IT_HTIF2);
-//		USART_SendData(UART4, 'H');
-//	}
-}
-
-/**
-  * @brief  Display Init (LCD)
-  * @param  None
-  * @retval None
-  */
-static void Display_Init(void)
-{
-  /* Initialize the LCD */
-  LCD_Init();
-  LCD_LayerInit();
-  /* Enable the LTDC */
-  LTDC_Cmd(ENABLE);
-
-  /* Set LCD Background Layer  */
-  LCD_SetLayer(LCD_BACKGROUND_LAYER);
-
-  /* Clear the Background Layer */
-  LCD_Clear(LCD_COLOR_BLACK);
-
-  /* Configure the transparency for background */
-  LCD_SetTransparency(0);
-
-  /* Set LCD Foreground Layer  */
-  LCD_SetLayer(LCD_FOREGROUND_LAYER);
-
-  /* Configure the transparency for foreground */
-  LCD_SetTransparency(255);
-
-  /* Clear the Foreground Layer */
-  LCD_Clear(LCD_COLOR_BLACK);
-
-  /* Set the LCD Back Color and Text Color*/
-  LCD_SetBackColor(LCD_COLOR_BLUE);
-  LCD_SetTextColor(LCD_COLOR_WHITE);
-
-    /* Set the LCD Text size */
-  LCD_SetFont(&FONTSIZE);
-
-  /* Set the LCD Back Color and Text Color*/
-  LCD_SetBackColor(LCD_COLOR_WHITE);
-  LCD_SetTextColor(LCD_COLOR_YELLOW);
-  LCD_Clear(LCD_COLOR_BLACK);
-}
-
-
-static void display_LCD(__IO uint16_t *data, uint16_t size){
-	LCD_SetTextColor(LCD_COLOR_BLACK); //Seleccionar pincel negr
-	LCD_PolyLine(pPoints, size); //Borrar curva (dibujar en negro
-
-	int j;
-	for(j=0;j<size;j++){
-  			pPoints++->X=(data[j]/18);//Asignar el valor del ADC/18 a la curva en pantall
-	}
-
-	pPoints=(pPoint)pointBuffer; //Apuntar al primer par X,  /		/* Display ADCs converted values on LCD *
-	LCD_SetTextColor(LCD_COLOR_YELLOW); //seleccionar pincel amarill
-	LCD_PolyLine((pPoint)pointBuffer, size); //graficar cu
-}
-
-/**
-  * @brief  ADC3 channel13 with DMA configuration
-  * @param  None
-  * @retval None
-  */
-static void ADC3_CH13_DMA_Config(void)
-{
-  ADC_InitTypeDef       ADC_InitStructure;
-  ADC_CommonInitTypeDef ADC_CommonInitStructure;
-  DMA_InitTypeDef       DMA_InitStructure;
-  GPIO_InitTypeDef      GPIO_InitStructure;
-  NVIC_InitTypeDef   NVIC_InitStructure;
-
-  /* Enable ADC3, DMA2 and GPIO clocks ****************************************/
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2 | RCC_AHB1Periph_GPIOC, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC3, ENABLE);
-
-  /* DMA2 Stream0 channel2 configuration **************************************/
-  DMA_InitStructure.DMA_Channel = DMA_Channel_2;
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&ADC3->DR);
-  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)adcBuffer_16bits;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-  DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE_16BITS;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
-  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
-  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(DMA2_Stream0, &DMA_InitStructure);
-  DMA_Cmd(DMA2_Stream0, ENABLE);
-
-  DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
-
-  /* Configure ADC3 Channel13 pin as analog input ******************************/
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AN;
-  GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL ;
-  GPIO_Init(GPIOC, &GPIO_InitStructure);
-
-  /* ADC Common Init **********************************************************/
-  ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;
-  ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;
-  ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;
-  ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;
-  ADC_CommonInit(&ADC_CommonInitStructure);
-
-  /* ADC3 Init ****************************************************************/
-  ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
-  ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
-  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_TRGO;
-  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-  ADC_InitStructure.ADC_NbrOfConversion = 1;
-  ADC_Init(ADC3, &ADC_InitStructure);
-
-  /* ADC3 regular channel13 configuration *************************************/
-  ADC_RegularChannelConfig(ADC3, ADC_Channel_13, 1, ADC_SampleTime_3Cycles);
-
- /* Enable DMA request after last transfer (Single-ADC mode) */
-  ADC_DMARequestAfterLastTransferCmd(ADC3, ENABLE);
-
-  /* Enable ADC3 DMA */
-  ADC_DMACmd(ADC3, ENABLE);
-
-  /* Enable ADC3 */
-  ADC_Cmd(ADC3, ENABLE);
-
-  /* Configure Interrupt */
-  /* Enable and set DMA Interrupt to the lowest priority */
-  NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream0_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
-}
 
 #ifdef  USE_FULL_ASSERT
 

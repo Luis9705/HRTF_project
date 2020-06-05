@@ -131,7 +131,9 @@ const uint16_t Sine12bit[128] = {2048,2138,2228,2318,2407,2495,2582,2668,2753,28
 
 #ifdef USE_LCD
 static void Display_Init(void);
-static void ADC3_CH13_DMA_Config(void);
+static void ADC_Config(void);
+ uint16_t ADC_getValue(void);
+ uint16_t get_angle(void);
 static void display_LCD(__IO uint16_t *data, uint16_t size);
 #endif /* USE_LCD */
 /* Private functions ---------------------------------------------------------*/
@@ -253,84 +255,19 @@ for(i=0;i<BUFFER_SIZE_16BITS;i++){
 	pPoints++->Y=i;  //eje de tiempo en la Y, dimension mas larga de la pantalla
 }
 pPoints=(pPoint)pointBuffer;
-ADC3_CH13_DMA_Config();
-TIM2_Config();
+ADC_Config();
 
 
-arm_fir_init_f32(&fir_struct_bandpass, NUM_COEFF, (float32_t *)&fir_coefficients_bandpass[0], &fir_states_bandpass[0], BUFFER_SIZE_16BITS);
-arm_fir_init_f32(&fir_struct_lowpass, NUM_COEFF, (float32_t *)&fir_coefficients_lowpass[0], &fir_states_lowpass[0], BUFFER_SIZE_16BITS);
-arm_fir_init_f32(&fir_struct_highpass, NUM_COEFF, (float32_t *)&fir_coefficients_highpass[0], &fir_states_highpass[0], BUFFER_SIZE_16BITS);
+uint16_t angle;
 
 while (1)
   {
-//	// Schmitt trigger
-//	ADC_ContinuousModeCmd(ADC3, ENABLE);
-//	ADC_SoftwareStartConv(ADC3);
-//	schmitt_trigger(2000, 50);
-//	ADC_ContinuousModeCmd(ADC3, DISABLE);
-//	delay(10000);
-//	ADC_DMACmd(ADC3, ENABLE);
-//	TIM_Cmd(TIM2, ENABLE);
-//	intFlag=0;
-//    while(intFlag==0){} //Esperar interrupcion del DMA
-//
-//	display_LCD(adcBuffer_16bits, BUFFERSIZE);
+
+	angle = get_angle();
 
 
-	while(memory_full==0){}
-	memory_full = 0;
-
-	/*************************** FORMATTING INPUT DATA ******************************/
-
-	convert_8bits_to_16bits(uartRxBuffer_8bits[current_memory_in], data_in_buffer_16bits, BUFFER_SIZE_16BITS);
-
-	arm_q15_to_float (( q15_t *)data_in_buffer_16bits, data_in_buffer_float, BUFFER_SIZE_16BITS);
-
-	/*************************** RIGHT CHANNEL PROCESSING ******************************/
-
-	fir_struct_bandpass.pCoeffs = (float32_t *)&fir_coefficients_bandpass[0];
-
-	arm_fir_f32	(	&fir_struct_bandpass,
-			data_in_buffer_float,
-			data_out_buffer_float,
-			BUFFER_SIZE_16BITS
-	);
-
-	arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
-
-	convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_right, BUFFER_SIZE_16BITS);
-
-	/*************************** LEFT CHANNEL PROCESSING ******************************/
-
-//	for(i=0;i<BUFFER_SIZE_16BITS;i++){
-//		data_out_buffer_16bits[i] = data_in_buffer_16bits[i];
-//	}
-
-	fir_struct_highpass.pCoeffs = (float32_t *)&fir_coefficients_highpass[0];
-
-	arm_fir_f32	(	&fir_struct_highpass,
-			data_in_buffer_float,
-			data_out_buffer_float,
-			BUFFER_SIZE_16BITS
-	);
-
-	arm_float_to_q15 (data_out_buffer_float, (q15_t *)data_out_buffer_16bits, BUFFER_SIZE_16BITS);
-
-	convert_16bits_to_8bits(data_out_buffer_16bits ,data_out_buffer_8bits_left, BUFFER_SIZE_16BITS);
 
 
-	/*************************** SENDING OUTPUT DATA ******************************/
-
-	if(SENDING_BLOCKS == 1){
-		format_Tx_Block_Mono(data_out_buffer_8bits_right, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
-	}else{
-		format_Tx_Block_Stereo(data_out_buffer_8bits_right, data_out_buffer_8bits_left, uartTxBuffer_8bits1, BUFFER_SIZE_8BITS);
-	}
-
-
-	while(send_dma==1){}
-	send_dma = 1;
-	sendBlockDMA();
 
   }
 }
@@ -436,43 +373,36 @@ static void display_LCD(__IO uint16_t *data, uint16_t size){
 	LCD_PolyLine((pPoint)pointBuffer, size); //graficar cu
 }
 
+
+ uint16_t ADC_getValue(void){
+	ADC_SoftwareStartConv(ADC3);
+	while (ADC_GetFlagStatus(ADC3, ADC_FLAG_EOC) == RESET) {}
+	return ADC_GetConversionValue(ADC3);
+
+}
+
+ uint16_t get_angle(void){
+	 uint16_t conv;
+	 conv = ADC_getValue();
+
+
+	 return ((conv * 36) / 4095) + 1;
+ }
 /**
   * @brief  ADC3 channel13 with DMA configuration
   * @param  None
   * @retval None
   */
-static void ADC3_CH13_DMA_Config(void)
+static void ADC_Config(void)
 {
   ADC_InitTypeDef       ADC_InitStructure;
   ADC_CommonInitTypeDef ADC_CommonInitStructure;
-  DMA_InitTypeDef       DMA_InitStructure;
   GPIO_InitTypeDef      GPIO_InitStructure;
-  NVIC_InitTypeDef   NVIC_InitStructure;
 
   /* Enable ADC3, DMA2 and GPIO clocks ****************************************/
-  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA2 | RCC_AHB1Periph_GPIOC, ENABLE);
+  RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC3, ENABLE);
 
-  /* DMA2 Stream0 channel2 configuration **************************************/
-  DMA_InitStructure.DMA_Channel = DMA_Channel_2;
-  DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&ADC3->DR);
-  DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)adcBuffer_16bits;
-  DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-  DMA_InitStructure.DMA_BufferSize = BUFFER_SIZE_16BITS;
-  DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-  DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
-  DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
-  DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
-  DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-  DMA_InitStructure.DMA_Priority = DMA_Priority_High;
-  DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Enable;
-  DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
-  DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-  DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
-  DMA_Init(DMA2_Stream0, &DMA_InitStructure);
-  DMA_Cmd(DMA2_Stream0, ENABLE);
-
-  DMA_ITConfig(DMA2_Stream0, DMA_IT_TC, ENABLE);
 
   /* Configure ADC3 Channel13 pin as analog input ******************************/
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
@@ -490,8 +420,8 @@ static void ADC3_CH13_DMA_Config(void)
   /* ADC3 Init ****************************************************************/
   ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;
   ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_Rising;
+  ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+  ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T2_TRGO;
   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfConversion = 1;
@@ -500,22 +430,9 @@ static void ADC3_CH13_DMA_Config(void)
   /* ADC3 regular channel13 configuration *************************************/
   ADC_RegularChannelConfig(ADC3, ADC_Channel_13, 1, ADC_SampleTime_3Cycles);
 
- /* Enable DMA request after last transfer (Single-ADC mode) */
-  ADC_DMARequestAfterLastTransferCmd(ADC3, ENABLE);
-
-  /* Enable ADC3 DMA */
-  ADC_DMACmd(ADC3, ENABLE);
-
   /* Enable ADC3 */
   ADC_Cmd(ADC3, ENABLE);
 
-  /* Configure Interrupt */
-  /* Enable and set DMA Interrupt to the lowest priority */
-  NVIC_InitStructure.NVIC_IRQChannel = DMA2_Stream0_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x01;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x01;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
 }
 
 #ifdef  USE_FULL_ASSERT

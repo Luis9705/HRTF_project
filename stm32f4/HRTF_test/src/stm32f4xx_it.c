@@ -146,33 +146,49 @@ void SysTick_Handler(void)
 {
 }
 
-extern __IO uint8_t KeyPressed;
+extern __IO uint8_t send_dma, current_memory_out,current_memory_in,memory_full;
 
-void EXTI0_IRQHandler(void)
+void DMA1_Stream7_IRQHandler(void)
 {
-  if(EXTI_GetITStatus(USER_BUTTON_EXTI_LINE) != RESET)
-  {
-    /* Change the int flag */
+	/* Test on DMA Stream Transfer Complete interrupt */
 
-    KeyPressed = RESET;
-
-    /* Clear the Right Button EXTI line pending bit */
-    EXTI_ClearITPendingBit(USER_BUTTON_EXTI_LINE);
-  }
-}
-extern uint8_t intFlag;
-void DMA2_Stream0_IRQHandler(void)
-{
-//		ADC_Cmd(ADC3, DISABLE); //deshabilitar ADC
-	TIM_Cmd(TIM2, DISABLE);
-	ADC_DMACmd(ADC3, DISABLE);
-	//ADC_DMACmd(ADC3, DISABLE);
-		intFlag=1; //Levantar bandera
+	if (DMA_GetITStatus(DMA1_Stream7, DMA_IT_TCIF7))
+	{
+		DMA_Cmd(DMA1_Stream7, DISABLE);
+		USART_DMACmd(UART5, USART_DMAReq_Tx, DISABLE);
+		send_dma = 0;
+		current_memory_out ^= 1;
+		/* Clear DMA Stream Transfer Complete interrupt pending bit */
+		DMA_ClearITPendingBit(DMA1_Stream7, DMA_IT_TCIF7);
 
 
-	DMA_ClearITPendingBit(DMA2_Stream0, DMA_IT_TCIF0);
+	}
+
 
 }
+
+void DMA1_Stream2_IRQHandler(void)
+{
+	/* Test on DMA Stream Transfer Complete interrupt */
+	if (DMA_GetITStatus(DMA1_Stream2, DMA_IT_TCIF2))
+	{
+		/* Clear DMA Stream Transfer Complete interrupt pending bit */
+		DMA_ClearITPendingBit(DMA1_Stream2, DMA_IT_TCIF2);
+		//USART_SendData(UART4, 'C');
+		current_memory_in ^= 1;
+		memory_full = 1;
+	}
+
+
+	/* Test on DMA Stream Half Transfer interrupt */
+//	if (DMA_GetITStatus(DMA1_Stream2, DMA_IT_HTIF2))
+//	{
+//		/* Clear DMA Stream Half Transfer interrupt pending bit */
+//		DMA_ClearITPendingBit(DMA1_Stream2, DMA_IT_HTIF2);
+//		USART_SendData(UART4, 'H');
+//	}
+}
+
 /******************************************************************************/
 /*                 STM32F4xx Peripherals Interrupt Handlers                   */
 /*  Add here the Interrupt Handler for the used peripheral(s) (PPP), for the  */

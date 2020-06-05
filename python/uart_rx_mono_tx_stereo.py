@@ -13,7 +13,7 @@ import wave
 from os import path
 
 start_time = 0
-duration = 10
+duration = 30
 BLOCK_SIZE = 640
 baudrate = 1500000
 
